@@ -625,7 +625,7 @@ export default function LiquidEther({
       }
       update(options?: { dt?: number; isBounce?: boolean; BFECC?: boolean }) {
         const { dt, isBounce, BFECC } = options || {};
-        if (!this.uniforms) return;
+        if (!this.uniforms) return null;
         if (typeof dt === 'number') this.uniforms.dt.value = dt;
         if (typeof isBounce === 'boolean') this.line.visible = isBounce;
         if (typeof BFECC === 'boolean') this.uniforms.isBFECC.value = BFECC;
@@ -702,9 +702,9 @@ export default function LiquidEther({
         });
         this.init();
       }
-      update(options?: { viscous?: number; iterations?: number; dt?: number }) {
+      update(options?: { viscous?: number; iterations?: number; dt?: number }): THREE.WebGLRenderTarget | null {
         const { viscous, iterations, dt } = options || {};
-        if (!this.uniforms) return;
+        if (!this.uniforms) return null;
         let fbo_in: THREE.WebGLRenderTarget | null, fbo_out: THREE.WebGLRenderTarget | null = null;
         if (typeof viscous === 'number') this.uniforms.v.value = viscous;
         const iter = iterations ?? 0;
@@ -721,7 +721,7 @@ export default function LiquidEther({
           if (typeof dt === 'number') this.uniforms.dt.value = dt;
           super.update();
         }
-        return fbo_out;
+        return fbo_out || null;
       }
     }
 
@@ -770,7 +770,7 @@ export default function LiquidEther({
         });
         this.init();
       }
-      update(options?: { iterations?: number }) {
+      update(options?: { iterations?: number }): THREE.WebGLRenderTarget | null {
         const { iterations } = options || {};
         let p_in: THREE.WebGLRenderTarget | null, p_out: THREE.WebGLRenderTarget | null = null;
         const iter = iterations ?? 0;
@@ -786,7 +786,7 @@ export default function LiquidEther({
           this.props.output = p_out;
           super.update();
         }
-        return p_out;
+        return p_out || null;
       }
     }
 
@@ -944,7 +944,7 @@ export default function LiquidEther({
           mouse_force: this.options.mouse_force,
           cellScale: this.cellScale
         });
-        let vel: any = this.fbos.vel_1;
+        let vel: THREE.WebGLRenderTarget | null = this.fbos.vel_1;
         if (this.options.isViscous) {
           vel = this.viscous.update({
             viscous: this.options.viscous,
@@ -1017,7 +1017,7 @@ export default function LiquidEther({
           this.lastUserInteraction = performance.now();
           if (this.autoDriver) this.autoDriver.forceStop();
         };
-        this.autoDriver = new AutoDriver(Mouse, this as any, {
+        this.autoDriver = new AutoDriver(Mouse, this, {
           enabled: props.autoDemo,
           speed: props.autoSpeed,
           resumeDelay: props.autoResumeDelay,
